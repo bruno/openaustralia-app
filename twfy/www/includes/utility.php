@@ -496,7 +496,7 @@ function trim_characters ($text, $start, $length) {
 		$text = substr($text, 0, $length - 3); 
 
 		// Word boundary.         
-		if (preg_match ("/(.*)\b.+/", $text, $matches)) {
+		if (preg_match ("/(.*)\s.+/", $text, $matches)) {
 			$text = $matches[1];
 			// Strip spare space at the end.
 			$text = preg_replace ("/\s$/", '', $text);
@@ -864,7 +864,7 @@ function make_member_url($name, $const = '', $house = 1) {
 
 function member_full_name($house, $title, $first_name, $last_name, $constituency) {
 	$s = 'ERROR';
-	if ($house == 1 || $house == 3) {
+	if ($house == 1 || $house == 3 || $house == 4) {
 		$s = $first_name . ' ' . $last_name;
 		if ($title) {
 			$s = $title . ' ' . $s;

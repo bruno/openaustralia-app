@@ -167,24 +167,7 @@ function add_alert ($details) {
 	}
 	$PAGE->message($message);
 	if ($advert) {
-		if ($THEUSER->isloggedin()) {
-			$advert_shown = crosssell_display_advert('twfy', $details['email'], $THEUSER->firstname() . ' ' . $THEUSER->lastname(), $THEUSER->postcode());
-		} else {
-			$advert_shown = crosssell_display_advert('twfy', $details['email'], '', '');
-		}
-		if ($advert_shown == 'other-twfy-alert-type') {
-			if ($details['pid']) {
-				$advert_shown = 'twfy-alert-word';
-?>		
-<p>Did you know that TheyWorkForYou can also email you when a certain word or phrases is mentioned in parliament? For example, it could mail you when your town is mentioned, or an issue you care about. Don't rely on the newspapers to keep you informed about your interests - find out what's happening straight from the horse's mouth.
-<a href="/alert/"><strong>Sign up for an email alert</strong></a></p>
-<?			} else {
-				$advert_shown = 'twfy-alert-person';
-?>
-<p>Did you know that TheyWorkForYou can also email you when a certain MP or Lord contributes in parliament? Don't rely on the newspapers to keep you informed about someone you're interested in - find out what's happening straight from the horse's mouth.
-<a href="/alert/"><strong>Sign up for an email alert</strong></a></p>
-	<?		}
-		}
+		$advert_shown = alert_confirmation_advert($details);
 		if ($extra) $extra .= "; ";
 		$extra .= "advert=$advert_shown";
 	}
@@ -283,13 +266,12 @@ above.</li>
 				<div class="row">
 				If you join or log in, you won't need to confirm your email address for every alert you set.
 				</div>
-	<?php	} ?>
-				<input type="hidden" name="submitted" value="true">
-				<input type="hidden" name="pg" value="alert">
-
-	</form>
-	
-	<?php
+	<?php	}
+		if (get_http_var('sign'))
+			echo '<input type="hidden" name="sign" value="' . htmlspecialchars(get_http_var('sign')) . '">';
+		if (get_http_var('site'))
+			echo '<input type="hidden" name="site" value="' . htmlspecialchars(get_http_var('site')) . '">';
+		echo '<input type="hidden" name="submitted" value="true"> </form>';
 } 
 
 ?>

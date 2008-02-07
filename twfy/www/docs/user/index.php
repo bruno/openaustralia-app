@@ -100,7 +100,7 @@ if (get_http_var("submitted") == "true") {
 	$details = array();
 	$details["firstname"]		= trim(get_http_var("firstname"));
 	$details["lastname"]		= trim(get_http_var("lastname"));
-	$details["email"]			= trim(get_http_var("email"));
+	$details["email"]			= trim(get_http_var("em"));
 	// We use boolean true/false internally. Convert the text from the form to boolean.
 	$details["emailpublic"]		= get_http_var("emailpublic") == "true" ? true : false;
 	$details["password"]		= trim(get_http_var("password"));
@@ -570,8 +570,8 @@ function display_form ( $details = array(), $errors = array() ) {
 	}
 ?>
 				<div class="row">
-				<span class="label"><label for="email">Email address:</label></span>
-				<span class="formw"><input type="text" name="email" id="email" value="<?php if (isset($details["email"])) { echo htmlentities($details["email"]); } ?>" maxlength="255" size="30" class="form"></span>
+				<span class="label"><label for="em">Email address:</label></span>
+				<span class="formw"><input type="text" name="em" id="em" value="<?php if (isset($details["email"])) { echo htmlentities($details["email"]); } ?>" maxlength="255" size="30" class="form"></span>
 				</div>
 
 <?php
@@ -687,6 +687,7 @@ function display_form ( $details = array(), $errors = array() ) {
 <?php	if ($this_page == 'userjoin') { ?>
 				<div class="row">
 				&nbsp;<br>Would <?php if ($this_page == "otheruseredit") { echo "they"; } else { echo "you"; } ?> like to receive an email whenever your MP does something in Parliament?
+	<br /><small>&nbsp;&nbsp;(if you're already getting email alerts to your address, don't worry about this)</small>
 				</div>
 
 				<div class="row">

@@ -171,7 +171,6 @@ $this->page = array (
 			'sidebar'		=> 'alert'
 
 		),
-		'pg'			=> 'alert',
 		'title'			=> 'TheyWorkForYou.com Email Alerts',
 		'url'			=> 'alert/',
 	),		
@@ -216,7 +215,6 @@ $this->page = array (
 	'alertwelcome' => array (
 		'title'			=> 'Email Alerts',
 		'url'			=> 'alert/',
-		'pg'			=> 'alertwelcome'
 	),
 
 // End of ALERTS additions
@@ -301,6 +299,12 @@ $this->page = array (
 	'epvote' => array (
 		'url'			=> 'vote/'
 	),
+
+	'gadget' => array(
+		'url'			=> 'gadget/',
+		'title'			=> 'TheyWorkForYou Google gadget',
+	),
+
 	'glossary' => array (
 		'heading'		=> 'Glossary',
 		'parent'		=> 'help_us_out',
@@ -339,13 +343,13 @@ $this->page = array (
 			'text'			=> 'Hansard',
 			'title'			=> "House of Commons debates and Written Answers"
 		),
-		'title'			=> 'House of Commons, House of Lords, and Northern Ireland Assembly',
+		'title'			=> 'House of Commons, House of Lords, Northern Ireland Assembly, and the Scottish Parliament',
 		'track'			=> true,
 		'url'			=> 'hansard/'
 	),	
 	'hansard_date' => array (
 		'parent'		=> 'hansard',
-		'title'			=> 'House of Commons, House of Lords, and Northern Ireland Assembly',
+		'title'			=> 'House of Commons, House of Lords, Northern Ireland Assembly, and the Scottish Parliament',
 		'track'			=> true,
 		'url'			=> 'hansard/'
 	),	
@@ -393,7 +397,7 @@ $this->page = array (
 		'parent'		=> 'lordsdebatesfront',
 		'track'			=> true,
 		'url'			=> 'lords/',
-		'session_vars'	=> array ('id'),
+		'session_vars'	=> array ('gid'),
 	),
 	'lordsdebates'  => array (
 		'parent'		=> 'lordsdebatesfront',
@@ -454,6 +458,21 @@ $this->page = array (
 		'url'			=> 'mlas/'
 	),
 
+	'msp' => array (
+		'title'			=> 'MSP',
+		'track'			=> true,
+		'url'			=> 'msp/'
+	),
+	'msps' => array (
+		 'menu'			=> array (
+			'text'			=> 'All MSPs',
+			'title'			=> "List of all MSPs"
+		),
+		'title'			=> 'All MSPs',
+		'track'			=> true,
+		'url'			=> 'msps/'
+	),
+
 	/* Not 'Your MP', whose name is 'yourmp'... */
 	'mp' => array (
 		'title'			=> 'MP',
@@ -504,7 +523,7 @@ $this->page = array (
 		'parent'		=> 'nidebatesfront',
 		'track'			=> true,
 		'url'			=> 'ni/',
-		'session_vars'	=> array ('id'),
+		'session_vars'	=> array ('gid'),
 	),
 	'nidebates'  => array (
 		'parent'		=> 'nidebatesfront',
@@ -666,6 +685,70 @@ $this->page = array (
 		'url'			=> 'skin/'
 	),
 	
+	/* Scottish Parliament */
+	'spdebate'  => array (
+		'parent'		=> 'spdebatesfront',
+		'track'			=> true,
+		'url'			=> 'sp/',
+		'session_vars'	=> array ('id'),
+	),
+	'spdebates'  => array (
+		'parent'		=> 'spdebatesfront',
+		'track'			=> true,
+		'url'			=> 'sp/',
+		'session_vars'	=> array ('id'),
+	),
+	'spdebatesday' => array (
+		'parent'		=> 'spdebatesfront',
+		'session_vars'	=> array ('d'),
+		'track'			=> true,
+		'url'			=> 'sp/',
+	),			
+	'spdebatesfront' => array (
+		'menu'			=> array (
+			'text'			=> 'Scottish Parliament Debates',
+			'title'			=> "Scottish Parliament debates"
+		),
+		'parent'		=> 'hansard',
+		'title'			=> 'Scottish Parliament debates',
+		'track'			=> true,
+		'rss'			=> 'sp/sp.rss',
+		'url'			=> 'sp/'
+	),
+	'spdebatesyear' => array (
+		'parent'		=> 'spdebatesfront',
+		'title'			=> 'Debates for ',
+		'url'			=> 'sp/'
+	),
+	'spwrans'  => array (
+		'parent'		=> 'spwransfront',
+		'url'			=> 'spwrans/',
+		'session_vars'	=> array ('id')
+	),
+	'spwransday'  => array (
+		'parent'		=> 'spwransfront',
+		'url'			=> 'spwrans/'
+	),
+	'spwransfront'  => array (
+		'menu'			=> array (
+			'text'			=> 'SP written answers',
+			'title'			=> "Written Answers"
+		),
+		'parent'		=> 'hansard',
+		'title'			=> 'Scottish Parliament Written answers',
+		'url'			=> 'spwrans/'
+	),
+	'spwransmp' => array(
+		'parent'		=> 'spwransfront',
+		'title'			=> 'For questions asked by ',
+		'url'			=> 'spwrans/'
+	),
+	'spwransyear' => array (
+		'parent'		=> 'spwransfront',
+		'title'			=> 'Scottish Parliament Written answers for ',
+		'url'			=> 'spwrans/'
+	),
+
 	// The URL 3rd parties need to ping something here.
 	'trackback' => array (
 		'url'			=> 'trackback/'

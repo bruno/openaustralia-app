@@ -227,11 +227,6 @@ class PAGE {
 <?php
 		}
 				
-
-		if ($this_page == 'sitenews_individual') {
-			$this->_mt_javascript();
-		}
-
 		if (!DEVSITE) {
 		?>
 
@@ -263,7 +258,7 @@ if (typeof urchinTracker == 'function') urchinTracker();
 		twfy_debug ("PAGE", "This page: $this_page");
 		
 		print "\t<a name=\"top\"></a>\n\n";
-		if (defined('OPTION_GAZE_URL') && (gaze_get_country_from_ip($_SERVER["REMOTE_ADDR"]) == 'NZ' || get_http_var('nz'))) {
+		if (defined('OPTION_GAZE_URL') && OPTION_GAZE_URL && (gaze_get_country_from_ip($_SERVER["REMOTE_ADDR"]) == 'NZ' || get_http_var('nz'))) {
 			print '<p align="center"><strong>New!</strong> You\'re in New Zealand, so check out <a href="http://www.theyworkforyou.co.nz">TheyWorkForYou.co.nz</a></p>';
 		}
 
@@ -336,11 +331,12 @@ if (typeof urchinTracker == 'function') urchinTracker();
 		// we're within that section.
 		$items = array (
 			'home' 		=> array ('sitenews', 'comments_recent', 'api_front'),
-			'hansard' 	=> array ('debatesfront', 'wransfront', 'whallfront', 'wmsfront', 'lordsdebatesfront', 'nidebatesfront'),
+			'hansard' 	=> array ('debatesfront', 'wransfront', 'whallfront', 'wmsfront', 'lordsdebatesfront', 'nidebatesfront','spdebatesfront','spwransfront'),
 			'yourmp'	=> array (),
 			'mps'           => array (),
 			'peers'		=> array (),
 			'mlas'          => array (),
+			'msps'          => array (),
 #			'help_us_out'	=> array (), 
 /*			'help_us_out'	=> array ('glossary_addterm'),  */
 			'help'		=> array ()
@@ -812,8 +808,9 @@ if (typeof urchinTracker == 'function') urchinTracker();
 			$page_text = '&nbsp;';
 		}
 
+		# XXX Yucky
 		if ($this_page != 'home' && $this_page != 'yourmp' && $this_page != 'mp' && $this_page != 'peer'
-			&& $this_page != 'mla' && $this_page != 'c4_mp' && $this_page != 'c4x_mp' && $this_page != 'royal' && $this_page != 'contact') {
+			&& $this_page != 'mla' && $this_page != 'c4_mp' && $this_page != 'c4x_mp' && $this_page != 'royal' && $this_page != 'contact' && $this_page != 'msp') {
 
 			if ($section_text && $parent_page != 'help_us_out' && $parent_page != 'home') {
 				print "\t\t\t\t<h2>$section_text</h2>\n";
@@ -1025,27 +1022,21 @@ pr()//-->
 			if (!$member['current_member'][$house]) $title .= ', former';
 			if ($house==1) $title .= ' MP';
 			if ($house==3) $title .= ' MLA';
+			if ($house==4) $title .= ' MSP';
 		}
 		if ($rssurl = $DATA->page_metadata($this_page, 'rss')) {
 			$title = '<a href="' . WEBPATH . $rssurl . '"><img src="' . WEBPATH . 'images/rss.gif" alt="RSS feed" border="0" align="right"></a> ' . $title;
 		}
 		print '<p class="printonly">This data was produced by TheyWorkForYou from a variety of sources.</p>';
 		$this->block_start(array('id'=>'mp', 'title'=>$title));
-		if (is_file(BASEDIR . IMAGEPATH . 'mpsL/' . $member['person_id'] . '.jpg')) {
-		?>
-						<img src="<?php echo IMAGEPATH;?>mpsL/<?php echo $member['person_id']; ?>.jpg" alt="Photo of <?php echo $member['full_name']; ?>" class="portrait">
-		<? } elseif (is_file(BASEDIR . IMAGEPATH . 'mpsL/' . $member['person_id'] . '.jpeg')) {
-		?>
-						<img src="<?php echo IMAGEPATH;?>mpsL/<?php echo $member['person_id']; ?>.jpeg" alt="Photo of <?php echo $member['full_name']; ?>" class="portrait">
-		<? } elseif (is_file(BASEDIR . IMAGEPATH . 'mps/' . $member['person_id'] . '.jpg')) {
-		?>
-						<img src="<?php echo IMAGEPATH;?>mps/<?php echo $member['person_id']; ?>.jpg" alt="Photo of <?php echo $member['full_name']; ?>" height="118" class="portrait">
-		<? } elseif (is_file(BASEDIR . IMAGEPATH . 'mps/' . $member['person_id'] . '.jpeg')) {
-		?>
-						<img src="<?php echo IMAGEPATH;?>mps/<?php echo $member['person_id']; ?>.jpeg" alt="Photo of <?php echo $member['full_name']; ?>" height="118" class="portrait">
-		<? } ?>
-						<ul class="hilites">
-						<?php
+		list($image,$sz) = find_rep_image($member['person_id']);
+		if ($image) {
+			echo '<img class="portrait" alt="Photo of ', $member['full_name'], '" src="', $image, '"';
+			if ($sz=='S') echo ' height="118"';
+			echo '>';
+		}
+
+		echo '<ul class="hilites">';
 		$desc = '';
 		foreach ($member['houses'] as $house) {
 			if ($house==0) {
@@ -1068,10 +1059,11 @@ pr()//-->
 					$desc .= $last['from'] . ' ';
 				}
 			}
-			if ($house==1 || $house==3) {
+			if ($house==1 || $house==3 || $house==4) {
 				$desc .= ' ';
 				if ($house==1) $desc .= 'MP';
 				if ($house==3) $desc .= 'MLA';
+				if ($house==4) $desc .= 'MSP';
 				$desc .= ' for ' . $member['left_house'][$house]['constituency'];
 			}
 			if ($house==2 && $party != 'Bishop') $desc .= ' Peer';
@@ -1157,6 +1149,17 @@ pr()//-->
 		if (in_array(3, $member['houses']) && !$member['current_member'][3]) {
 			print '<li><strong>Left the Assembly on '.$member['left_house'][3]['date_pretty'].'</strong>';
 			if ($member['left_house'][3]['reason']) print ' &mdash; ' . $member['left_house'][3]['reason'];
+			print '</li>';
+		}
+		if (isset($member['entered_house'][4]['date'])) {
+			print '<li><strong>Entered the Scottish Parliament on ';
+			print $member['entered_house'][4]['date_pretty'].'</strong>';
+			if ($member['entered_house'][4]['reason']) print ' &mdash; ' . $member['entered_house'][4]['reason'];
+			print '</li>';
+		}
+		if (in_array(4, $member['houses']) && !$member['current_member'][4]) {
+			print '<li><strong>Left the Scottish Parliament on '.$member['left_house'][4]['date_pretty'].'</strong>';
+			if ($member['left_house'][4]['reason']) print ' &mdash; ' . $member['left_house'][4]['reason'];
 			print '</li>';
 		}
 		if (isset($extra_info['majority_in_seat'])) { 
@@ -1431,7 +1434,7 @@ if ((in_array(1, $member['houses']) && $member['party']!='Sinn Fein') || in_arra
 		}
 		
 		if ($topics_block_empty) {
-			print "<p><em>This MP is not currently on any select <-- or public bill --> committee
+			print "<p><em>This MP is not currently on any select <!-- or public bill --> committee
 and has had no written questions answered for which we know the department or subject.</em></p>";
 		}
 		$this->block_end();
@@ -1550,6 +1553,7 @@ and has had no written questions answered for which we know the department or su
 if ($member['house_disp']==1) print 'this MP';
 elseif ($member['house_disp']==2) print 'this peer';
 elseif ($member['house_disp']==3) print 'this MLA';
+elseif ($member['house_disp']==4) print 'this MSP';
 elseif ($member['house_disp']==0) print $member['full_name']; ?> speaks<?php
 			if ($member['current_member'][0] || $member['current_member'][2] || $member['current_member'][3] || ($member['current_member'][1] && $member['party'] != 'Sinn Fein')) {
 				print ' &mdash; <a href="' . WEBPATH . 'alert/?only=1&amp;pid='.$member['person_id'].'">email me whenever '. $member['full_name']. ' speaks</a>';
@@ -1718,6 +1722,9 @@ elseif ($member['house_disp']==0) print $member['full_name']; ?> speaks<?php
 		// BIOGRAPHY.
 		if (isset($links['mp_website'])) {
 			$html .= '<li><a href="' . $links['mp_website'] . '">'. $member->full_name().'\'s personal website</a></li>';
+		}
+		if (isset($links['sp_url'])) {
+			$html .= '<li><a href="' . $links['sp_url'] . '">'. $member->full_name().'\'s page on the Scottish Parliament website</a></li>';
 		}
 
 		if(isset($links['guardian_biography'])) {
@@ -1977,7 +1984,7 @@ elseif ($member['house_disp']==0) print $member['full_name']; ?> speaks<?php
 		// Returns a message if parliament is currently in recess.
 		include_once INCLUDESPATH."easyparliament/recess.php";
 		$message = '';
-		list($name, $from, $to) = recess_prettify(date('j'), date('n'), date('Y'));
+		list($name, $from, $to) = recess_prettify(date('j'), date('n'), date('Y'), 1);
 		if ($name) {
 			$message = 'The Houses of Parliament are in their ' . $name . ' ';
 			if ($from && $to) {
@@ -2036,94 +2043,72 @@ elseif ($member['house_disp']==0) print $member['full_name']; ?> speaks<?php
 		if ($value == '')
 			$value = get_http_var('s');
 
+		echo '<div class="mainsearchbox">';
 		if ($wtt<2) {
-		?>
-<div class="mainsearchbox">
-					<form action="<?php echo $URL->generate(); ?>" method="get">
-<?php if (get_http_var('o')) { ?>
-					<input type="hidden" name="o" value="<?php echo htmlentities(get_http_var('o')); ?>">
-<?php }
-	if (get_http_var('house')) { ?>
-					<input type="hidden" name="house" value="<?=htmlentities(get_http_var('house')); ?>">
-<?php } ?>
-					<input type="text" name="s" value="<?php echo htmlentities($value); ?>" size="20">
-					<input type="submit" value=" <?=($wtt?'Modify search':'Search') ?> "><br>
-<?
+			echo '<form action="', $URL->generate(), '" method="get">';
+			if (get_http_var('o')) {
+				echo '<input type="hidden" name="o" value="', htmlentities(get_http_var('o')), '">';
+			}
+			if (get_http_var('house')) {
+				echo '<input type="hidden" name="house" value="', htmlentities(get_http_var('house')), '">';
+			}
+			echo '<input type="text" name="s" value="', htmlentities($value), '" size="20"> ';
+			echo '<input type="submit" value=" ', ($wtt?'Modify search':'Search'), ' "><br>';
+			if ($wtt) print '<input type="hidden" name="wtt" value="1">';
 
-if ($wtt) print '<input type="hidden" name="wtt" value="1">';
-
-} else { ?>
-<div class="mainsearchbox">
+		} else { ?>
 	<form action="http://www.writetothem.com/lords" method="get">
 	<input type="hidden" name="pid" value="<?=htmlentities(get_http_var('pid')) ?>">
 	<input type="submit" style="font-size: 150%" value=" I want to write to this Lord "><br>
-<? }
+<?
+		}
 
-if (!$wtt) { ?>
-<div style='margin-top: 5px'>
-<?php
-     $orderUrl = new URL('search');
-        $ordering = get_http_var('o');
-        if ($ordering!='r' && $ordering!='d' && $ordering != 'p') {
-            $ordering='d';
-        }
+		if (!$wtt) {
+			echo '<div style="margin-top: 5px">';
+			$orderUrl = new URL('search');
+		        $ordering = get_http_var('o');
+		        if ($ordering!='r' && $ordering!='d' && $ordering != 'p') {
+		            $ordering='d';
+		        }
         
-        if ($ordering=='r') {
-            print '<strong>Most relevant results are first</strong>';
-        } else {
-            printf("<a href='%s'>Show most relevant results first</a>", $orderUrl->generate('html', array('o'=>'r')));
-        }
+		        if ($ordering=='r') {
+				print '<strong>Most relevant results are first</strong>';
+		        } else {
+				printf("<a href='%s'>Show most relevant results first</a>", $orderUrl->generate('html', array('o'=>'r')));
+		        }
 
-        print "&nbsp;|&nbsp;";
-        if ($ordering=='d') {
-            print '<strong>Most recent results are first</strong>';
-        } else {
-            printf("<a href='%s'>Show most recent results first</a>", $orderUrl->generate('html', array('o'=>'d')));
-        }
+		        print "&nbsp;|&nbsp;";
+		        if ($ordering=='d') {
+				print '<strong>Most recent results are first</strong>';
+		        } else {
+				printf("<a href='%s'>Show most recent results first</a>", $orderUrl->generate('html', array('o'=>'d')));
+		        }
 
-	print "&nbsp;|&nbsp;";
-	if ($ordering=='p') {
-		print '<strong>Use by person</strong>';
-	} else {
-		printf('<a href="%s">Show use by person</a>', $orderUrl->generate('html', array('o'=>'p')));
-	}
-?>
-</div>
-<?php	$qds = '';
-	if ($SEARCHENGINE) {
-		$qds = $SEARCHENGINE->query_description_short();
-		$plural = 'is';
-		if (strstr($qds, 'phrases') || strstr($qds, 'words') || preg_match('/word.*?phrase/', $qds)) $plural = 'are';
-		$qds .= " $plural mentioned";
-		$qds = preg_replace('#^spoken by (.*?) is mentioned in#', 'something is said by $1 in', $qds);
-		$qds = preg_replace('#spoken by (.*?) is mentioned in#', 'is spoken by $1 in', $qds);
-	}
-        $person_id = get_http_var('pid');
-        if ($person_id != "") {
-            $member = new MEMBER(array('person_id' => $person_id));
-	    if ($member->valid) {
-	            $name = $member->full_name();
+			print "&nbsp;|&nbsp;";
+			if ($ordering=='p') {
+				print '<strong>Use by person</strong>';
+			} else {
+				printf('<a href="%s">Show use by person</a>', $orderUrl->generate('html', array('o'=>'p')));
+			}
+			echo '</div>';
+
+		        $person_id = get_http_var('pid');
+		        if ($person_id != "") {
+				$member = new MEMBER(array('person_id' => $person_id));
+				if ($member->valid) {
+			        	$name = $member->full_name();
                 ?>
                     <p>
                     <input type="radio" name="pid" value="<?php echo htmlentities($person_id) ?>" checked>Search only <?php echo htmlentities($name) ?> 
                     <input type="radio" name="pid" value="">Search all speeches
                     </p>
                 <?
-	    }
-       }
-}
-            ?>
+	    			}
+       			}
+		}
 
-					</form>
-				</div><? if ($SEARCHENGINE && !$wtt) { ?>
-			<div class="stripe-2" align="center" style="margin-bottom: 2em">
-		<a href="<?=WEBPATH ?>alert/?only=1<?=($value?'&amp;keyword='.urlencode($value):'') . ($person_id?'&amp;pid='.urlencode($person_id):'') ?>">Email me when <?=$qds ?></a>
-		</div>
-<?php				}
+		echo '</form> </div>';
 	}
-	
-	
-	
 	
 	function login_form ($errors = array()) {
 		// Used for /user/login/ and /user/prompt/
@@ -2611,7 +2596,12 @@ Please read our <a href="<?php echo $RULESURL->generate(); ?>"><strong>House Rul
 		?></textarea></p>
 
 					<p><input type="submit" value="Preview" class="submit">
-					<input type="submit" name="submitcomment" value="Post" class="submit"></p>
+<?php
+		if (isset($commentdata['body'])) {
+			echo '<input type="submit" name="submitcomment" value="Post" class="submit">';
+		}
+?>
+</p>
 					<input type="hidden" name="epobject_id" value="<?php echo $commentdata['epobject_id']; ?>">
 					<input type="hidden" name="gid" value="<?php echo $commentdata['gid']; ?>">
 					<input type="hidden" name="return_page" value="<?php echo $commentdata['return_page']; ?>">
@@ -2942,81 +2932,6 @@ Please read our <a href="<?php echo $RULESURL->generate(); ?>"><strong>House Rul
 		
 		return $html;
 	}
-	
-	
-	
-	function _mt_javascript () {
-		// This javascript is included in the head of the page if we're 
-		// on an individual archive page in the sitenews section.
-		// It does the 'Remember me?' stuff for comment forms.
-		?>
-	<script type="text/javascript" language="javascript">
-	<!--
-	
-	var HOST = '<?php echo DOMAIN; ?>';
-	
-	// Copyright (c) 1996-1997 Athenia Associates.
-	// http://www.webreference.com/js/
-	// License is granted if and only if this entire
-	// copyright notice is included. By Tomer Shiran.
-	
-	function setCookie (name, value, expires, path, domain, secure) {
-		var curCookie = name + "=" + escape(value) + ((expires) ? "; expires=" + expires.toGMTString() : "") + ((path) ? "; path=" + path : "") + ((domain) ? "; domain=" + domain : "") + ((secure) ? "; secure" : "");
-		document.cookie = curCookie;
-	}
-	
-	function getCookie (name) {
-		var prefix = name + '=';
-		var c = document.cookie;
-		var nullstring = '';
-		var cookieStartIndex = c.indexOf(prefix);
-		if (cookieStartIndex == -1)
-			return nullstring;
-		var cookieEndIndex = c.indexOf(";", cookieStartIndex + prefix.length);
-		if (cookieEndIndex == -1)
-			cookieEndIndex = c.length;
-		return unescape(c.substring(cookieStartIndex + prefix.length, cookieEndIndex));
-	}
-	
-	function deleteCookie (name, path, domain) {
-		if (getCookie(name))
-			document.cookie = name + "=" + ((path) ? "; path=" + path : "") + ((domain) ? "; domain=" + domain : "") + "; expires=Thu, 01-Jan-70 00:00:01 GMT";
-	}
-	
-	function fixDate (date) {
-		var base = new Date(0);
-		var skew = base.getTime();
-		if (skew > 0)
-			date.setTime(date.getTime() - skew);
-	}
-	
-	function rememberMe (f) {
-		var now = new Date();
-		fixDate(now);
-		now.setTime(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-		setCookie('mtcmtauth', f.author.value, now, '/', HOST, '');
-		setCookie('mtcmtmail', f.email.value, now, '/', HOST, '');
-		setCookie('mtcmthome', f.url.value, now, '/', HOST, '');
-	}
-	
-	function forgetMe (f) {
-		deleteCookie('mtcmtmail', '/', HOST);
-		deleteCookie('mtcmthome', '/', HOST);
-		deleteCookie('mtcmtauth', '/', HOST);
-		f.email.value = '';
-		f.author.value = '';
-		f.url.value = '';
-	}
-	
-	//-->
-	</script>
-<?php
-	
-	
-	}
-
-
-
 }
 
 

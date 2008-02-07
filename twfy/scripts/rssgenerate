@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Make sure only one copy runs at once
+if [ x$LOCKFILE = x ]
+then
+        /home/fawkes/fawkes/scripts/run-with-lockfile -n /home/fawkes/fawkes/scripts/rssgenerate-lockfile $0
+        if [ $? = 100 ]
+        then
+                echo "Another copy of rssgenerate is already running" 1>&2
+        fi
+        exit $?
+fi
+
+# Check Xapian index is correct
+# Far too slow to be run in daily process
+#cd ~/fawkes/search
+#./index.pl ~/searchdb/ check $CRONQUIET_NODASH
+
+# Make RSS this takes a while
+cd ~/fawkes/scripts
+./wms2rss.pl > /data/vhost/www.theyworkforyou.com/docs/wms/wms.rss
+./debates2rss.pl > /data/vhost/www.theyworkforyou.com/docs/debates/debates.rss
+./lords2rss.pl > /data/vhost/www.theyworkforyou.com/docs/lords/lords.rss
+./whall2rss.pl > /data/vhost/www.theyworkforyou.com/docs/whall/whall.rss
+./ni2rss.pl > /data/vhost/www.theyworkforyou.com/docs/ni/ni.rss
+./pbc2rss.pl > /data/vhost/www.theyworkforyou.com/docs/pbc/pbc.rss
+php -q mprss.php
+

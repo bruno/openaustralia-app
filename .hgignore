@@ -1,0 +1,3 @@
+syntax: glob
+twfy/www/docs/images/mps/*.jpg
+twfy/www/docs/images/mpsL/*.jpg
